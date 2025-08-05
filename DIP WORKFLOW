@@ -1,0 +1,461 @@
+# FUEL STATION DAILY WORKFLOW - DATABASE EVIDENCE-BASED
+## Morning to Evening Operations (Laravel Web App)
+
+---
+
+## 🌅 MORNING OPERATIONS
+
+### 1. **Daily Readings Entry (Table: `daily_readings`)**
+
+#### **Required Fields:**
+```sql
+- tank_id (must exist in tanks table)
+- reading_date
+- shift (MORNING/EVENING)
+- morning_dip_liters (must be > 0)
+- evening_dip_liters (entered later)
+- recorded_by_user_id
+```
+
+#### **Database Validations:**
+```sql
+-- tr_validate_future_dates (BEFORE INSERT)
+IF NEW.reading_date > DATE_ADD(CURDATE(), INTERVAL 1 DAY) THEN
+   SIGNAL SQLSTATE '45000'
+   MESSAGE_TEXT = 'Reading date cannot be more than 1 day in future'
+
+-- fn_validate_entry_time
+RETURNS 1 -- Always allows entry (no time restrictions)
+```
+
+#### **Automatic Actions:**
+```sql
+-- tr_readings_hash_chain (BEFORE INSERT)
+NEW.hash_value = SHA2(CONCAT(previous_hash, tank_id, date, readings), 256)
+```
+
+### 2. **Meter Readings (Table: `meter_readings`)**
+
+#### **Required Fields:**
+```sql
+- meter_id (from meters table)
+- reading_date
+- opening_reading_liters
+- closing_reading_liters
+- dispensed_liters (GENERATED: closing - opening)
+- recorded_by_user_id
+```
+
+#### **Trigger Validation:**
+```sql
+-- tr_validate_meter_progression (BEFORE INSERT)
+IF NEW.closing_reading_liters < previous_reading THEN
+   IF previous > 9999000 AND NEW.closing < 1000 THEN
+      -- Meter reset detected
+      SET NEW.meter_reset_occurred = TRUE
+      SET NEW.pre_reset_reading = previous
+   ELSE
+      SIGNAL SQLSTATE '45000'
+      MESSAGE_TEXT = 'Meter reading cannot go backward'
+```
+
+---
+
+## 🚚 DELIVERY PROCESS (Table: `deliveries`)
+
+### **Required Fields:**
+```sql
+- tank_id
+- delivery_date
+- supplier_name
+- invoice_number
+- volume_liters
+- cost_per_liter_ugx
+- total_cost_ugx
+- delivery_status (PENDING/IN_PROGRESS/COMPLETED/CANCELLED)
+```
+
+### **Validations:**
+```sql
+-- tr_validate_tank_capacity (BEFORE INSERT)
+IF (current_stock + NEW.volume_liters) > tank_capacity THEN
+   SIGNAL SQLSTATE '45000'
+   MESSAGE_TEXT = 'Delivery exceeds tank capacity'
+```
+
+### **Automatic FIFO Layer Creation:**
+```sql
+-- tr_enhanced_delivery_fifo_layers (AFTER UPDATE)
+WHEN delivery_status changes to 'COMPLETED':
+   IF AUTO_DELIVERY_LAYER_CREATION = 'TRUE' THEN
+      INSERT INTO tank_inventory_layers
+      -- Creates new FIFO layer automatically
+```
+
+---
+
+## 💧 SALES PROCESSING (AUTOMATIC)
+
+### **Meter Reading Triggers FIFO:**
+```sql
+-- tr_enhanced_meter_fifo_automation (AFTER INSERT on meter_readings)
+1. Calculates: sales = current - previous (handles resets)
+2. Creates readings record with calculated_sales_liters
+3. Calls sp_enhanced_fifo_processor(tank_id, quantity, reading_id, pump_id)
+```
+
+### **FIFO Processing (sp_enhanced_fifo_processor):**
+```sql
+-- Processes consumption in order:
+1. Validates parameters
+2. Uses cursor to consume oldest layers first
+3. Updates tank_inventory_layers:
+   - current_quantity
+   - consumed_quantity
+   - is_depleted status
+4. Creates batch_consumption records
+```
+
+---
+
+## 🌆 EVENING RECONCILIATION - ALL SCENARIOS
+
+### **What Happens When Evening Dip is Entered**
+
+The `tr_enhanced_evening_dip_reconciliation` trigger evaluates different data conditions:
+
+---
+
+### **SCENARIO 1: Perfect Data (Everything Present)**
+```sql
+Condition: Meter readings exist + Morning dip > 0 + Evening dip > 0
+
+What Happens:
+1. Creates/Updates daily_reconciliations record
+2. Calculates dispensed from meter_readings
+3. Gets deliveries (can be 0)
+4. Calculates: Theoretical = Opening + Delivered - Dispensed
+5. Variance = Actual(Evening) - Theoretical
+6. Calls sp_calculate_fifo_cogs
+7. FIFO layers consumed automatically
+8. Variance checked by tr_auto_variance_detection
+
+Result: Complete reconciliation with all financials
+```
+
+---
+
+### **SCENARIO 2: No Sales (No Meter Readings)**
+```sql
+Condition: NO meter readings + Dips present
+
+Database Actions:
+- Adds to reconciliation_queue:
+  queue_status: 'PENDING'
+  priority: 'HIGH' (missing critical data)
+  missing_data_flags: {
+    "has_meter_readings": false,
+    "has_morning_dip": true,
+    "has_evening_dip": true,
+    "missing_critical_data": true,
+    "station_id": [station_id],
+    "created_by_trigger": true,
+    "trigger_timestamp": [unix_timestamp],
+    "data_quality_issues": {
+      "negative_morning_dip": false,
+      "negative_evening_dip": false,
+      "null_morning_dip": false,
+      "null_evening_dip": false
+    }
+  }
+- Logs to stock_valuation_audit:
+  data_quality_score: 20.00
+  error_message: "Reconciliation queued due to missing data - Meters: 0"
+
+What Can Still Happen:
+- If estimation enabled: Uses historical averages
+- Creates reconciliation with 0 dispensed
+- Variance will show as loss if closing < opening
+```
+
+---
+
+### **SCENARIO 3: Negative/Invalid Morning Dip**
+```sql
+Condition: Morning dip < 0 OR NULL + Evening dip valid
+
+Database Actions:
+- Adds to reconciliation_queue:
+  priority: 'NORMAL'
+  missing_data_flags: {
+    "negative_morning_dip": true,
+    "data_quality_issues": {...}
+  }
+- Logs to stock_valuation_audit:
+  data_quality_score: 50.00
+  validation_status: 'ERROR'
+
+Cannot Proceed Without Manual Fix
+```
+
+---
+
+### **SCENARIO 4: Negative/Invalid Evening Dip**
+```sql
+Condition: Morning dip valid + Evening dip < 0 OR NULL
+
+Database Actions:
+- Adds to reconciliation_queue:
+  priority: 'NORMAL'
+  missing_data_flags: {
+    "negative_evening_dip": true
+  }
+- Cannot calculate variance
+- Requires manual intervention
+```
+
+---
+
+### **SCENARIO 5: Partial Meter Readings**
+```sql
+Condition: Some meters have readings, others don't
+
+What Happens:
+1. Proceeds with available data
+2. Calculates dispensed from working meters only
+3. Creates reconciliation with WARNING
+4. Logs data_quality_score: 70.00
+5. Variance may be higher than normal
+
+Note: System doesn't wait for missing meters
+```
+
+---
+
+### **SCENARIO 6: System Disabled**
+```sql
+Condition: STOCK_VALUATION_ENABLED = 'FALSE'
+
+What Happens:
+- Trigger exits immediately
+- Logs to stock_valuation_audit:
+  calculation_method: 'SYSTEM_DISABLED'
+- No reconciliation created
+- No queue entry
+```
+
+---
+
+### **QUEUE PROCESSING (What Happens Next)**
+
+For queued items, `sp_process_reconciliation_queue` runs:
+
+```sql
+1. Checks queue every X minutes (scheduled job)
+2. Processes by priority: CRITICAL > HIGH > NORMAL > LOW
+3. For each item:
+
+   IF retry_count < 3 (VALUATION_QUEUE_MAX_RETRIES) THEN
+      - Checks if missing data arrived
+      - If RECOVERY_ESTIMATION_ENABLED = 'TRUE':
+        Uses sp_attempt_reconciliation_with_estimation
+      - Updates queue_status
+   ELSE
+      - Sets manual_intervention_required = TRUE
+      - Stops processing this item
+```
+
+---
+
+### **VARIANCE HANDLING (After Reconciliation)**
+
+When reconciliation completes, variances are auto-detected:
+
+```sql
+sp_check_variance_notifications creates notifications:
+
+IF ABS(variance%) > 5.0% → Critical notification
+IF ABS(variance%) > 2.0% → High severity
+IF ABS(variance%) > 1.0% → Moderate
+IF ABS(variance%) > 0.5% → Warning
+
+Each creates entry in notifications table:
+- notification_type: 'volume_variance'
+- requires_action: TRUE
+- severity level determines who must approve
+```
+
+---
+
+### **ESTIMATION LOGIC (When Enabled)**
+
+From `sp_attempt_reconciliation_with_estimation`:
+
+```sql
+IF missing morning dip:
+   - Uses previous evening dip as estimate
+
+IF missing evening dip:
+   - Calculates: Morning + Delivered - Dispensed
+
+IF missing meter readings:
+   - Uses 14-day average consumption
+   - Marks estimated_data_used = TRUE
+
+Data quality scores:
+- Complete data: 100.00
+- Estimated data: 30.00 - 70.00
+```
+
+---
+
+### **ERROR SCENARIOS**
+
+```sql
+1. Tank not found → TRIGGER_DATA_ERROR
+2. No fuel type → FUEL_TYPE_ERROR
+3. No selling price → Uses 0, logs WARNING
+4. FIFO calculation fails → Logs ERROR, continues
+5. Negative dispensed → INVALID_DISPENSED_VOLUME
+```
+
+Each error is logged to `stock_valuation_audit` with specific error codes and continues processing what it can.
+
+---
+
+## 📊 VARIANCE HANDLING
+
+### **Automatic Detection (tr_auto_variance_detection):**
+```sql
+-- From system_configurations table:
+VALUATION_VARIANCE_MINOR_PCT = 0.5
+VALUATION_VARIANCE_MODERATE_PCT = 1.0
+VALUATION_VARIANCE_CRITICAL_PCT = 2.0
+VARIANCE_ESCALATION_HIGH_PCT = 5.0
+VARIANCE_ESCALATION_CRITICAL_PCT = 8.0
+
+-- Creates variances record when exceeded:
+IF ABS(variance%) > 0.5% OR ABS(variance) > 50L THEN
+   INSERT INTO variances (
+      status = 'pending_approval',
+      escalation_level = STATION/REGIONAL/CEO
+   )
+```
+
+### **Notifications Created (sp_check_variance_notifications):**
+```sql
+INSERT INTO notifications (
+   notification_type = 'volume_variance',
+   severity = minor/moderate/high/critical,
+   requires_action = TRUE
+)
+```
+
+---
+
+## 🔄 QUEUE PROCESSING
+
+### **Reconciliation Queue (Table: `reconciliation_queue`):**
+```sql
+- Retry up to 3 times (VALUATION_QUEUE_MAX_RETRIES)
+- 30 minute delays (VALUATION_QUEUE_RETRY_DELAY_MINUTES)
+- Can use estimation if RECOVERY_ESTIMATION_ENABLED = 'TRUE'
+```
+
+### **Historical Recovery:**
+```sql
+-- sp_process_batch_historical_recovery
+- Max 90 days lookback (MAX_RECOVERY_DAYS_LOOKBACK)
+- Batch size 50 (RECOVERY_BATCH_SIZE)
+- Quality threshold 70% (RECOVERY_DATA_QUALITY_THRESHOLD)
+```
+
+---
+
+## 📋 EMPLOYEE RESPONSIBILITIES
+
+### **Station Staff Must:**
+
+1. **Morning:**
+   - Enter morning dip reading
+   - Enter opening meter readings
+   - Check previous day's variances
+
+2. **During Deliveries:**
+   - Enter delivery details
+   - Update status to COMPLETED when done
+
+3. **Evening:**
+   - Enter closing meter readings
+   - Enter evening dip reading
+   - This triggers reconciliation
+
+### **Managers Must:**
+   - Approve variances based on escalation level
+   - Monitor notifications table
+   - Review system_health_monitoring
+
+---
+
+## 📈 SYSTEM MONITORING
+
+### **Automatic Procedures:**
+```sql
+-- sp_enhanced_system_monitor
+Checks:
+- FIFO integrity
+- Capacity violations
+- Negative inventory
+- Depletion flags
+
+-- sp_enhanced_data_cleanup
+Deletes:
+- system_health_monitoring > 30 days (except CRITICAL)
+- resolved system_accuracy_alerts > 90 days
+```
+
+### **Key Monitoring Tables:**
+- `system_health_monitoring` - System alerts
+- `system_accuracy_alerts` - Data warnings
+- `notifications` - User action items
+- `audit_log` - All changes tracked
+
+---
+
+## 🛡️ SECURITY FEATURES
+
+### **Hash Chains Prevent Tampering:**
+- `tr_readings_hash_chain`
+- `tr_deliveries_hash_chain`
+- `tr_selling_prices_hash_chain`
+
+### **Access Control:**
+- Station-based: Users see only assigned stations
+- Admin role: Sees all stations
+- All actions logged in `audit_log`
+
+---
+
+## 💰 FINANCIAL FEATURES
+
+### **LCM (Lower of Cost or Market):**
+```sql
+-- From system_configurations:
+LCM_ANALYSIS_ENABLED = 'TRUE'
+LCM_CHECK_FREQUENCY_DAYS = 7
+LCM_WRITEDOWN_THRESHOLD_PCT = 5.0
+LCM_AUTO_WRITEDOWN_ENABLED = 'FALSE'
+
+-- Procedures:
+sp_calculate_lcm_adjustment
+sp_apply_lcm_writedown (requires approval)
+```
+
+### **Financial Tracking:**
+- `financial_ledger` - All transactions
+- `profit_loss_statements` - P&L generation
+- `daily_station_summaries` - Daily aggregates
+
+---
+
+This workflow is 100% based on your actual database schema, triggers, procedures, and configurations. No mobile app, no assumptions - just what your Laravel web application supports through the database.

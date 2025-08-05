@@ -42,6 +42,118 @@
                     <span class="badge-status bg-green-100 text-green-700 border border-green-200">Live</span>
                 </a>
             </div>
+
+              <div class="menu-section">
+                <div class="mb-3 px-2">
+                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
+                        <span class="phase-badge mr-2 bg-gradient-to-r from-red-500 to-red-600">Alert</span>
+                        Monitoring & Alerts
+                    </span>
+                </div>
+
+                <div class="menu-section-header hover:bg-accent/50 transition-all"
+                    onclick="toggleInnovativeDropdown('variance-dropdown')">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-icon bg-red-50 rounded-lg p-1.5">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <span class="font-medium">Accounting Module</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
+                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                            id="variance-dropdown-arrow"></i>
+                    </div>
+                </div>
+                <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown">
+                    <a href="{{ route('reports.daily-profit-loss') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
+                        <span> Profit & Loss Statement</span>
+                    </a>
+                    <a href="{{ route('reconciliation.analytics') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Reconciliation Dashboard</span>
+                    </a>
+                    <a href="{{ route('cogs.dashboard') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Cost of Goods (COGS)</span>
+                    </a>
+
+                     <a href="{{ route('reports.inventory-analysis') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Inventory Analysis</span>
+                    </a>
+
+
+
+                </div>
+
+                {{-- <div class="menu-section-header hover:bg-accent/50 transition-all"
+                    onclick="toggleInnovativeDropdown('notifications-dropdown')">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-icon bg-yellow-50 rounded-lg p-1.5">
+                            <i class="fas fa-bell text-yellow-600"></i>
+                        </div>
+                        <span class="font-medium">Notifications</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="badge-count bg-yellow-100 text-yellow-700 border border-yellow-200">7</span>
+                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                            id="notifications-dropdown-arrow"></i>
+                    </div>
+                </div>
+                <div class="menu-dropdown bg-accent/10 rounded-lg" id="notifications-dropdown">
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-inbox w-3 h-3 mr-2 opacity-60 text-yellow-600"></i>
+                        <span>All Notifications</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-exclamation-circle w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Critical Alerts</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-oil-well w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Low Stock Alerts</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-cog w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Alert Settings</span>
+                    </a>
+                </div> --}}
+
+                {{-- <div class="menu-section-header hover:bg-accent/50 transition-all"
+                    onclick="toggleInnovativeDropdown('system-health-dropdown')">
+                    <div class="flex items-center space-x-3">
+                        <div class="menu-icon bg-pink-50 rounded-lg p-1.5">
+                            <i class="fas fa-heartbeat text-pink-600"></i>
+                        </div>
+                        <span class="font-medium">System Health</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="badge-status bg-green-100 text-green-700 border border-green-200">Online</span>
+                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                            id="system-health-dropdown-arrow"></i>
+                    </div>
+                </div>
+                <div class="menu-dropdown bg-accent/10 rounded-lg" id="system-health-dropdown">
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-chart-pie w-3 h-3 mr-2 opacity-60 text-pink-600"></i>
+                        <span>System Monitor</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-database w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Data Integrity</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-shield-alt w-3 h-3 mr-2 opacity-60"></i>
+                        <span>Security Logs</span>
+                    </a>
+                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                        <i class="fas fa-tools w-3 h-3 mr-2 opacity-60"></i>
+                        <span>System Maintenance</span>
+                    </a>
+                </div> --}}
+            </div>
             <!-- PHASE 1: Foundation Data Setup -->
             <div class="menu-section">
                 <div class="mb-3 px-2">
@@ -165,14 +277,11 @@
                         <i class="fas fa-dollar-sign w-3 h-3 mr-2 opacity-60 text-green-600"></i>
                         <span> Selling Prices</span>
                     </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <a href="{{ route('price-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-history w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Price History</span>
+                        <span>Price Analytics</span>
                     </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Price Analysis</span>
-                    </a> --}}
+
                 </div>
             </div>
 
@@ -235,11 +344,11 @@
                     </div>
                 </div>
                 <div class="menu-dropdown bg-accent/10 rounded-lg" id="daily-readings-dropdown">
-                    <a href="{{ route('daily-dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-sun w-3 h-3 mr-2 opacity-60 text-emerald-600"></i>
                         <span>Morning Dip Readings</span>
                     </a>
-                    <a href="{{ route('daily-evening-dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-moon w-3 h-3 mr-2 opacity-60"></i>
                         <span>Evening Dip Readings</span>
                     </a>
@@ -314,10 +423,10 @@
                         <i class="fas fa-calendar-alt w-3 h-3 mr-2 opacity-60"></i>
                         <span>Monthly Summary</span>
                     </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <a href="{{ route('reconciliation-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-calculator w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Manual Reconciliation</span>
-                    </a> --}}
+                        <span>Reconcliation Analysis</span>
+                    </a>
                 </div>
             </div>
 

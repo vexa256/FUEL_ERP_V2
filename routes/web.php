@@ -8,12 +8,49 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\VarianceController;
 use App\Http\Controllers\DeliveriesController;
 use App\Http\Controllers\MeterReadingsController;
+use App\Http\Controllers\PriceAnalysisController;
 use App\Http\Controllers\TankManagementController;
 use App\Http\Controllers\MeterManagementController;
 use App\Http\Controllers\UsersManagementController;
 use App\Http\Controllers\DailyDipReadingsController;
+use App\Http\Controllers\FifoCostAnalysisController;
 use App\Http\Controllers\StationsManagementController;
+use App\Http\Controllers\ReconciliationAnalysisController;
 use App\Http\Controllers\DailyEveningDipReadingsController;
+
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+
+    // Reconciliation Analysis Routes
+    Route::prefix('reconciliation-analysis')->name('reconciliation-analysis.')->group(function () {
+
+        Route::get('/', [ReconciliationAnalysisController::class, 'index'])->name('index');
+
+        Route::get('/missing', [ReconciliationAnalysisController::class, 'missingReconciliations'])->name('missing');
+
+        Route::get('/faulty', [ReconciliationAnalysisController::class, 'faultyReconciliations'])->name('faulty');
+
+        Route::get('/fifo-integrity', [ReconciliationAnalysisController::class, 'fifoIntegrity'])->name('fifo-integrity');
+
+        Route::get('/variance-analysis', [ReconciliationAnalysisController::class, 'varianceAnalysis'])->name('variance-analysis');
+
+        Route::post('/process-manual', [ReconciliationAnalysisController::class, 'processManualReconciliation'])->name('process-manual');
+
+        Route::get('/performance-report', [ReconciliationAnalysisController::class, 'performanceReport'])->name('performance-report');
+
+    });
+
+});
+
+Route::middleware(['auth'])->group(function () {
+   Route::get('/price-analysis', [PriceAnalysisController::class, 'index'])->name('price-analysis.index');
+   Route::get('/price-analysis/history', [PriceAnalysisController::class, 'priceHistory'])->name('price-analysis.history');
+});
+
+
 
 
 
@@ -42,29 +79,47 @@ Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function
     Route::get('/monthly-summary', [ReportsController::class, 'monthlySummary'])->name('monthly-summary');
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/meter-readings', [MeterReadingsController::class, 'index'])->name('meter-readings.index');
-    Route::post('/meter-readings/morning', [MeterReadingsController::class, 'storeMorningReading'])->name('meter-readings.store-morning');
-    Route::post('/meter-readings/evening', [MeterReadingsController::class, 'storeEveningReading'])->name('meter-readings.store-evening');
-    Route::get('/meter-readings/pending', [MeterReadingsController::class, 'getPendingReadings'])->name('meter-readings.pending');
-});
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/meter-readings', [MeterReadingsController::class, 'index'])->name('meter-readings.index');
+//     Route::post('/meter-readings/morning', [MeterReadingsController::class, 'storeMorningReading'])->name('meter-readings.store-morning');
+//     Route::post('/meter-readings/evening', [MeterReadingsController::class, 'storeEveningReading'])->name('meter-readings.store-evening');
+//     Route::get('/meter-readings/pending', [MeterReadingsController::class, 'getPendingReadings'])->name('meter-readings.pending');
+// });
 
 
 // Evening Dip Readings Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/daily-evening-dip-readings', [DailyEveningDipReadingsController::class, 'index'])->name('daily-evening-dip-readings.index');
-    Route::post('/daily-evening-dip-readings', [DailyEveningDipReadingsController::class, 'store'])->name('daily-evening-dip-readings.store');
-    Route::get('/daily-evening-dip-readings/pending', [DailyEveningDipReadingsController::class, 'getPendingTanks'])->name('daily-evening-dip-readings.pending');
-});
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/daily-evening-dip-readings', [DailyEveningDipReadingsController::class, 'index'])->name('daily-evening-dip-readings.index');
+//     Route::post('/daily-evening-dip-readings', [DailyEveningDipReadingsController::class, 'store'])->name('daily-evening-dip-readings.store');
+//     Route::get('/daily-evening-dip-readings/pending', [DailyEveningDipReadingsController::class, 'getPendingTanks'])->name('daily-evening-dip-readings.pending');
+// });
 // routes/web.php
+// routes/web.php - Simple backward compatible routes
 
-Route::middleware(['auth'])->group(function () {
-   Route::get('daily-dip-readings', [DailyDipReadingsController::class, 'index'])->name('daily-dip-readings.index');
-   Route::post('daily-dip-readings/morning', [DailyDipReadingsController::class, 'storeMorningReading'])->name('daily-dip-readings.store-morning');
-   Route::post('daily-dip-readings/evening', [DailyDipReadingsController::class, 'storeEveningReading'])->name('daily-dip-readings.store-evening');
-   Route::get('daily-dip-readings/pending', [DailyDipReadingsController::class, 'getPendingReadings'])->name('daily-dip-readings.pending');
-});
+// Route::middleware(['auth'])->group(function () {
 
+//     // NEW ROUTES - Morning Dip Readings
+//     Route::prefix('morning-dip-readings')->name('morning-dip-readings.')->group(function () {
+//         Route::get('/', [App\Http\Controllers\MorningDipReadingsController::class, 'index'])->name('index');
+//         Route::post('/station-data', [App\Http\Controllers\MorningDipReadingsController::class, 'getStationData'])->name('station-data');
+//         Route::post('/', [App\Http\Controllers\MorningDipReadingsController::class, 'store'])->name('store');
+//         Route::post('/summary', [App\Http\Controllers\MorningDipReadingsController::class, 'getSummary'])->name('summary');
+//         Route::post('/tank-history', [App\Http\Controllers\MorningDipReadingsController::class, 'getTankHistory'])->name('tank-history');
+//     });
+
+//     // OLD ROUTES - Keep working with new controller
+//     Route::get('daily-dip-readings', [App\Http\Controllers\MorningDipReadingsController::class, 'index'])
+//         ->name('daily-dip-readings.index');
+
+//     Route::post('daily-dip-readings/morning', [App\Http\Controllers\MorningDipReadingsController::class, 'store'])
+//         ->name('daily-dip-readings.store-morning');
+
+//     Route::post('daily-dip-readings/evening', [App\Http\Controllers\EveningDipReadingsController::class, 'store'])
+//         ->name('daily-dip-readings.store-evening');
+
+//     Route::get('daily-dip-readings/pending', [App\Http\Controllers\MorningDipReadingsController::class, 'getSummary'])
+//         ->name('daily-dip-readings.pending');
+// });
 // Deliveries Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/deliveries', [DeliveriesController::class, 'index'])->name('deliveries.index');
@@ -144,8 +199,9 @@ Route::middleware(['auth'])->group(function () {
 Route::redirect('/', url('/stations'));
 
 Route::get('/dashboard', function () {
-    return redirect()->url('/stations');
+    return redirect()->to('/stations');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 
 Route::middleware('auth')->group(function () {
@@ -156,3 +212,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/V2.php';

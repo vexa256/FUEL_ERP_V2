@@ -1,0 +1,115 @@
+✅ 1. Daily Profit & Loss Statement
+✅ 2. Monthly P&L Statement
+✅ 3. Yearly P&L Statement
+✅ 4. Daily Revenue by Station/Fuel Type
+✅ 5. Revenue Trend Analysis
+✅ 6. Cost of Goods Sold (COGS)
+✅ 7. FIFO Cost Analysis
+✅ 8. General Ledger by Account
+✅ 9. Trial Balance
+✅ 10. Inventory Value by Station
+✅ 11. Inventory Movement Analysis
+✅ 12. Variance Cost Analysis
+✅ 13. Variance P&L Impact
+✅ 14. Fuel Type P&L Breakdown
+✅ 15. Fuel Type Margin Analysis
+✅ 16. Price Change Financial Impact
+✅ 17. Pricing Evolution Report
+✅ 18. Weighted Average Cost Analysis
+✅ 19. Volume vs Revenue Analysis
+✅ 20. Delivery Cost Impact Analysis
+
+
+Current Tank Inventory Status
+
+FIFO Inventory Layers Report
+
+Delivery History Report
+
+Stock Alert Threshold Status
+
+Daily Sales Reconciliation Report
+
+Meter Dispensing Report
+
+FIFO Cost Consumption Report
+
+Selling Price History Report
+
+Financial Ledger Report
+
+Variance and Notifications Report
+
+
+
+
+🔍 AUDIT MODULE REPORTS (Database-Supported Only)
+1. System Audit Trail Report
+Table: audit_log
+
+All database changes (INSERT/UPDATE/DELETE)
+User activity tracking
+IP address and timestamp logging
+
+2. Daily Reconciliation Audit Report
+Tables: daily_reconciliations, tanks, users
+
+Reconciliation accuracy tracking
+Variance analysis by user/tank
+Reconciliation timing patterns
+
+3. FIFO Layer Integrity Audit
+Tables: fifo_layers, fifo_consumption_log, tanks
+
+Layer exhaustion validation
+Consumption sequence verification
+Remaining volume accuracy
+
+4. Stock Variance Audit Report
+Tables: daily_reconciliations, notifications, tanks
+
+Variance pattern analysis
+Critical variance incidents
+Variance resolution tracking
+
+5. User Activity Audit Report
+Tables: audit_log, users, stations
+
+User action frequency
+Cross-station access attempts
+Authentication patterns
+
+6. Financial Ledger Audit Report
+Tables: financial_ledger, daily_reconciliations
+
+Revenue/COGS entry validation
+Ledger balance verification
+Account reconciliation accuracy
+
+7. Delivery Validation Audit
+Tables: deliveries, fifo_layers, tanks, audit_log
+
+Delivery-to-FIFO layer matching
+Volume discrepancy tracking
+Supplier delivery patterns
+
+8. Meter Reading Audit Report
+Tables: meter_readings, meters, daily_readings, users
+
+Reading consistency validation
+Meter accuracy verification
+Reader performance tracking
+
+9. Notification Response Audit
+Tables: notifications, users
+
+Alert resolution times
+Unresolved critical alerts
+Response pattern analysis
+
+10. Tank Volume Reconciliation Audit
+Tables: tanks, daily_reconciliations, deliveries, meter_readings
+
+Physical vs system volume validation
+Volume movement tracking
+Tank integrity verification

@@ -6,9 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Services\FuelERP_CriticalPrecisionService;
 
-class DeliveriesController  extends Controller
+class DeliveriesController extends Controller
 {
+    protected $fuelService;
+
+    public function __construct(FuelERP_CriticalPrecisionService $fuelService)
+    {
+        $this->fuelService = $fuelService;
+    }
+
     /**
      * Display deliveries dashboard with strict station access control
      * 🔒 ENFORCES STATION-LEVEL ACCESS CONTROL - REAL FIELDS ONLY
@@ -149,7 +157,7 @@ class DeliveriesController  extends Controller
                 'date_to'
             ));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['error' => $e->getMessage()]);
         }
     }
 
@@ -220,18 +228,17 @@ class DeliveriesController  extends Controller
                 'suppliers'
             ));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Store delivery with FIFO automation compliance
-     * 🛡️ RESPECTS tr_delivery_create_fifo_layer TRIGGER
+     * Store delivery using FuelERP_CriticalPrecisionService
+     * 🛡️ REPLACES DATABASE TRIGGERS WITH SERVICE AUTOMATION
+     * 🔥 CRITICAL: Uses createDelivery() method instead of direct DB operations
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
-
         try {
             // Get user's accessible stations
             $accessible_stations = $this->getUserAccessibleStations();
@@ -242,7 +249,8 @@ class DeliveriesController  extends Controller
                 return back()->with('error', 'Access denied to selected station')->withInput();
             }
 
-            // VALIDATION - EXACT SCHEMA CONSTRAINTS
+            // UI-LEVEL VALIDATION - INPUT SANITIZATION ONLY
+            // Service handles all business logic validation
             $validator = Validator::make($request->all(), [
                 'station_id' => [
                     'required',
@@ -251,12 +259,6 @@ class DeliveriesController  extends Controller
                 'tank_id' => [
                     'required',
                     'exists:tanks,id'
-                ],
-                'delivery_reference' => [
-                    'required',
-                    'string',
-                    'max:100',
-                    'unique:deliveries,delivery_reference'
                 ],
                 'volume_liters' => [
                     'required',
@@ -292,6 +294,7 @@ class DeliveriesController  extends Controller
                     'max:100'
                 ]
             ]);
+
             if ($validator->fails()) {
                 // Handle AJAX requests
                 if (request()->ajax()) {
@@ -304,26 +307,15 @@ class DeliveriesController  extends Controller
                 // Handle traditional form requests
                 return back()->withErrors($validator)->withInput();
             }
-            // BUSINESS RULE VALIDATIONS - REAL FIELDS ONLY
+
+            // ADDITIONAL UI VALIDATION - Station ownership check
             $validator->after(function ($validator) use ($request) {
                 $tank_id = $request->tank_id;
-                $volume = $request->volume_liters;
 
                 // Validate tank belongs to station - REAL FK CHECK
                 $tank = DB::table('tanks')->where('id', $tank_id)->first();
                 if (!$tank || $tank->station_id != $request->station_id) {
                     $validator->errors()->add('tank_id', 'Tank does not belong to selected station');
-                    return;
-                }
-
-                // CRITICAL: Capacity validation (prevents trigger failure)
-                $projected_volume = $tank->current_volume_liters + $volume;
-                if ($projected_volume > $tank->capacity_liters) {
-                    $available = $tank->capacity_liters - $tank->current_volume_liters;
-                    $validator->errors()->add(
-                        'volume_liters',
-                        'Delivery would exceed tank capacity. Available: ' . number_format($available, 3) . 'L'
-                    );
                 }
             });
 
@@ -331,42 +323,29 @@ class DeliveriesController  extends Controller
                 return back()->withErrors($validator)->withInput();
             }
 
-            // Calculate total with EXACT precision
-            $total_cost = round($request->volume_liters * $request->cost_per_liter_ugx, 4);
-
-            // Insert delivery - EXACT SCHEMA FIELDS ONLY
-            $delivery_id = DB::table('deliveries')->insertGetId([
+            // 🔥 CRITICAL: Use FuelERP_CriticalPrecisionService instead of direct DB operations
+            // Service handles ALL business logic: validation, FIFO creation, tank updates, audit logging
+            $deliveryData = [
                 'tank_id' => $request->tank_id,
                 'user_id' => auth()->id(),
-                'delivery_reference' => strtoupper(trim($request->delivery_reference)),
-                'volume_liters' => round($request->volume_liters, 3),
-                'cost_per_liter_ugx' => round($request->cost_per_liter_ugx, 4),
-                'total_cost_ugx' => $total_cost,
+                'volume_liters' => (float) $request->volume_liters,
+                'cost_per_liter_ugx' => (float) $request->cost_per_liter_ugx,
                 'delivery_date' => $request->delivery_date,
                 'delivery_time' => $request->delivery_time,
                 'supplier_name' => $request->supplier_name ? trim($request->supplier_name) : null,
-                'invoice_number' => $request->invoice_number ? trim($request->invoice_number) : null,
-                'created_at' => now()
-            ]);
+                'invoice_number' => $request->invoice_number ? trim($request->invoice_number) : null
+            ];
 
-            // Verify trigger executed - CHECK REAL FIFO_LAYERS TABLE
-            $fifo_created = DB::table('fifo_layers')
-                ->where('delivery_id', $delivery_id)
-                ->exists();
-
-            if (!$fifo_created) {
-                DB::rollBack();
-                return back()->with('error', 'Delivery trigger failed to create FIFO layer')->withInput();
-            }
-
-            // Audit logging - REAL AUDIT_LOG SCHEMA
-            $this->logAuditAction('deliveries', $delivery_id, 'INSERT', null, [
-                'tank_id' => $request->tank_id,
-                'volume_liters' => round($request->volume_liters, 3),
-                'total_cost_ugx' => $total_cost
-            ]);
-
-            DB::commit();
+            // 🚨 SERVICE CALL - This replaces ALL previous manual operations:
+            // - delivery_reference generation
+            // - tank capacity validation
+            // - total_cost_ugx calculation
+            // - deliveries table insert
+            // - tank volume update
+            // - FIFO layer creation
+            // - stock alert threshold creation
+            // - audit logging
+            $delivery_id = $this->fuelService->createDelivery($deliveryData);
 
             // Handle AJAX requests
             if (request()->ajax()) {
@@ -380,8 +359,10 @@ class DeliveriesController  extends Controller
             // Handle traditional form requests
             return redirect()->route('deliveries.show', $delivery_id)
                 ->with('success', 'Delivery recorded successfully. FIFO automation completed.');
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            // 🔥 CRITICAL: Service throws raw exceptions - pass them through unchanged
+            // This maintains error context and diagnostic information
 
             // Handle AJAX requests
             if (request()->ajax()) {
@@ -452,7 +433,7 @@ class DeliveriesController  extends Controller
                 return back()->with('error', 'Access denied to delivery station');
             }
 
-            // Get FIFO layer created by trigger - REAL FIFO_LAYERS FIELDS
+            // Get FIFO layer created by service - REAL FIFO_LAYERS FIELDS
             $fifo_layer = DB::table('fifo_layers')
                 ->select([
                     'id',
@@ -461,14 +442,18 @@ class DeliveriesController  extends Controller
                     'remaining_volume_liters',
                     'cost_per_liter_ugx',
                     'delivery_date',
-                    'is_exhausted'
+                    'is_exhausted',
+                    'original_value_ugx',
+                    'remaining_value_ugx',
+                    'consumed_value_ugx',
+                    'layer_status'
                 ])
                 ->where('delivery_id', $delivery_id)
                 ->first();
 
             return view('deliveries.show', compact('delivery', 'fifo_layer'));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['error' => $e->getMessage()]);
         }
     }
 
@@ -518,6 +503,56 @@ class DeliveriesController  extends Controller
     }
 
     /**
+     * Get supported fuel types from service
+     * 🔥 NEW: Leverages service's fuel type validation
+     */
+    public function getSupportedFuelTypes(Request $request)
+    {
+        try {
+            $table = $request->get('table', 'tanks');
+            $fuelTypes = $this->fuelService->getSupportedFuelTypes($table);
+
+            return response()->json([
+                'success' => true,
+                'fuel_types' => $fuelTypes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get tanks by station with fuel type filtering
+     * 🔥 NEW: Uses service method for consistency
+     */
+    public function getTanksByStation(Request $request)
+    {
+        try {
+            $station_id = $request->get('station_id');
+            $fuel_type = $request->get('fuel_type');
+
+            if (!$station_id) {
+                return response()->json(['error' => 'Station ID required'], 400);
+            }
+
+            // Validate station access
+            $accessible_stations = $this->getUserAccessibleStations();
+            if (!$accessible_stations->contains('id', $station_id)) {
+                return response()->json(['error' => 'Access denied to station'], 403);
+            }
+
+            $tanks = $this->fuelService->getTanksByStation($station_id, $fuel_type);
+
+            return response()->json([
+                'success' => true,
+                'tanks' => $tanks
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Get user's accessible stations - REAL SCHEMA ONLY
      * 🔒 CORE ACCESS CONTROL METHOD
      */
@@ -542,29 +577,5 @@ class DeliveriesController  extends Controller
             ->select('id', 'name', 'location', 'currency_code')
             ->where('id', $user->station_id)
             ->get();
-    }
-
-    /**
-     * Log audit action - REAL AUDIT_LOG SCHEMA ONLY
-     * 🔒 TAMPER-EVIDENT AUDIT TRAIL
-     */
-    private function logAuditAction($table_name, $record_id, $action, $old_values, $new_values)
-    {
-        try {
-            // EXACT AUDIT_LOG SCHEMA FIELDS
-            DB::table('audit_log')->insert([
-                'table_name' => $table_name,
-                'record_id' => $record_id,
-                'action' => $action,
-                'old_values' => $old_values ? json_encode($old_values) : null,
-                'new_values' => $new_values ? json_encode($new_values) : null,
-                'user_id' => auth()->id() ?? null,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'created_at' => now()
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Audit log failed: ' . $e->getMessage());
-        }
     }
 }

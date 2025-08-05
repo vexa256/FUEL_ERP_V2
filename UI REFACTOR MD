@@ -1,0 +1,41 @@
+Golden Rule: Maintain Familiarity, Enhance the Look
+The design and layout of the view should remain 100% consistent with what users are accustomed to. Avoid making significant changes to the overall layout or structure, as this minimizes the need for retraining and ensures a smooth transition. Familiarity is key to user adoption and efficiency.
+
+However, the aesthetics and interactions of the existing design must be elevated to a premium level. While the core structure and layout should stay the same, the visual appeal, interactivity, and overall user experience must be enhanced dramatically. This means improving colors, fonts, icons, spacing, button interactions, and animations to meet top-tier design standards without altering the familiar structure. The goal is to maintain the user’s comfort with the layout while making the design feel fresh, modern, and premium.
+
+Prompt: Refactor View to Integrate with the New Controller
+You are tasked with refactoring the existing view to integrate it seamlessly with the newly provided MeterReadingsV2Controller. Key objectives include:
+
+Maintain Familiarity: The design and layout of the view should remain 100% consistent with what users are accustomed to. Avoid making significant changes to the layout or structure, as this will minimize the need for retraining. Familiarity is key to user adoption. However, enhance the aesthetics and interactions of the existing design to make it premium while keeping the layout unchanged.
+
+Enhance the Look: While maintaining the familiar layout, elevate the design to premium standards. Focus on improving colors, fonts, icons, button styles, spacing, and animations to ensure the view has a modern, high-end look. Adhere to artistic, premium design standards without compromising user familiarity.
+
+ShadCNUI Design: Ensure that all buttons use the default ShadCNUI primary black color and follow the ShadCNUI design patterns. No SVGs should be used; icons are mandatory. The design must be 100% premium, reflecting top-tier UI/UX principles that align with Fortune 100 company standards.
+
+Controller-Driven Logic: The entire view logic must be driven by the provided controller. Avoid introducing phantom logic, data, or structures that are not supported by the controller. Ensure all functionality, including validation and navigation, strictly aligns with what is supported by the controller.
+
+Error Prevention: Implement strict error handling to prevent incorrect data submissions. Ensure that all potential errors from the controller are caught and displayed using Swal2 where necessary. The view must make it impossible to submit invalid data that could disrupt the system's logic or corrupt database automation.
+
+Optimized Code Footprint: Reduce the code footprint aggressively while ensuring 100% functionality. The view should avoid unnecessary code, leveraging DOM-based filtering and manipulation as much as possible. Every line of code must serve a critical purpose with zero redundancy.
+
+Tabs/Wizard Approach: Follow the ShadCNUI wizard/tab navigation design strictly. The user experience must be intuitive, with clear navigation between steps and smooth transitions. Ensure that form submissions are handled efficiently with a wizard-like flow, and the logic supports this structure fully.
+
+Premium Design Compliance: The visual design must adhere to both Tailwind CSS and ShadCNUI’s premium standards. Ensure error-free rendering across all possible scenarios, and validate all edge cases for UI interactions, such as form validation, dynamic field population, and button states.
+
+Detailed Plan: Before starting to code each view, analyze and describe the steps you will take to enhance its design and how you will incorporate the controller's logic into the view. Focus on premium visual aesthetics and engineering precision.
+
+Error Handling Strategy: Plan for aggressive error handling and ensure that all errors are gracefully displayed, particularly those from the backend logic. Incorporate swal2 alerts where necessary to guide users and prevent any erroneous submissions.
+
+Next Steps:
+First View File: Specify the exact view file you're going to code.
+
+Engineering Design: For each view, ensure compliance with the premium design standards, leveraging Tailwind and ShadCNUI principles.
+
+Code Once: Begin coding one file at a time, ensuring each view works with the new controller and routes provided.
+
+Code and Design Overview:
+Use wizard/tab navigation as outlined in the ShadCNUI design system.
+
+Primary black ShadCNUI buttons for actions, with a premium, artistic look for all other elements.
+
+Implement a clear, smooth user flow, validated at every step, ensuring no errors in logic, data, or presentation.

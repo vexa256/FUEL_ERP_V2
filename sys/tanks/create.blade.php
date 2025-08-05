@@ -586,11 +586,7 @@ function tankCreateWizard() {
                 }
 
                 // Validate margin
-                if (margin < 5) {
-                    this.marginStatus = { color: 'bg-red-100', textColor: 'text-red-600' };
-                    this.marginWarning = 'Margin below minimum requirement of 5%';
-                    this.errors.selling_price_per_liter = 'Minimum 5% margin required';
-                } else if (margin < 10) {
+                 if (margin < 10) {
                     this.marginStatus = { color: 'bg-orange-100', textColor: 'text-orange-600' };
                     this.marginWarning = 'Low margin - consider increasing selling price';
                     this.errors.selling_price_per_liter = '';

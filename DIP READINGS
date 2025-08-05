@@ -1,0 +1,120 @@
+How Evening Dip Readings Trigger Reconciliation with Missing Data
+The Smart Queue System
+When evening dip readings are entered, the tr_enhanced_evening_dip_reconciliation trigger automatically handles various scenarios:
+1. No Sales (No Meter Readings)
+sqlScenario: Station had no sales all day
+- Morning dip: 5,000L
+- Evening dip: 5,000L
+- Meter readings: NONE
+
+System Response:
+- Reconciliation QUEUED with priority: HIGH
+- missing_data_flags: {
+    "has_meter_readings": false,
+    "missing_critical_data": true
+  }
+- Creates reconciliation with 0 dispensed liters
+- No FIFO processing occurs
+2. No Deliveries
+sqlScenario: No fuel deliveries that day
+- Morning dip: 5,000L
+- Evening dip: 4,200L
+- Meter readings: Present
+- Deliveries: NONE
+
+System Response:
+- Reconciliation proceeds NORMALLY
+- total_delivered_liters = 0
+- Calculates dispensed from meter readings
+- FIFO processes existing inventory
+3. Partial Data Missing
+sqlScenario: Some pumps didn't record readings
+- Tank has 3 meters
+- Only 2 meters have readings
+- Dip readings present
+
+System Response:
+- Reconciliation proceeds with WARNING
+- Uses available meter data
+- Variance detection may trigger
+- Logs data quality score: 70%
+4. Invalid/Negative Dip Readings
+sqlScenario: Equipment malfunction
+- Morning dip: -1 (sensor error)
+- Evening dip: 4,500L
+
+System Response:
+- QUEUED with priority: NORMAL
+- missing_data_flags: {
+    "negative_morning_dip": true,
+    "data_quality_issues": {...}
+  }
+- Requires manual intervention
+The Reconciliation Queue Magic
+The reconciliation_queue table acts as a safety net:
+sqlCREATE TABLE reconciliation_queue (
+    queue_status: PENDING/PROCESSING/COMPLETED/FAILED/RETRY
+    missing_data_flags: JSON -- Detailed tracking
+    retry_count: 0-3 attempts
+    priority: LOW/NORMAL/HIGH/CRITICAL
+    manual_intervention_required: TRUE/FALSE
+)
+Queue Processing Logic:
+
+Automatic Retries: System retries up to 3 times, checking if missing data arrives later
+Priority Handling:
+
+CRITICAL: Missing meter readings (potential fraud)
+HIGH: No meter data at all
+NORMAL: Invalid dip readings
+LOW: Minor data issues
+
+
+Estimation Mode: If enabled (RECOVERY_ESTIMATION_ENABLED = TRUE), system can:
+
+Use historical averages
+Interpolate from nearby days
+Apply seasonal patterns
+
+
+
+Real-World Example Flow
+Day 1: Rural Station Scenario
+06:00 - Morning dip taken: 8,000L
+[Power outage - no meter readings all day]
+18:00 - Evening dip taken: 7,500L
+
+System Actions:
+1. Trigger fires when evening dip entered
+2. Checks for meter readings - NONE FOUND
+3. Creates queue entry:
+   - Status: PENDING
+   - Priority: HIGH
+   - missing_data_flags: {
+       "has_meter_readings": false,
+       "power_outage_suspected": true
+     }
+4. Attempts reconciliation with:
+   - Opening: 8,000L
+   - Closing: 7,500L
+   - Dispensed: 0L (no meter data)
+   - Variance: -500L (unexplained loss!)
+5. Creates variance alert for investigation
+6. Waits for manual meter readings entry
+
+Day 2: Manual Entry
+- Staff enters yesterday's manual meter readings
+- System detects update
+- Re-processes reconciliation
+- Updates dispensed to 490L
+- Variance reduced to -10L (acceptable)
+- Queue status: COMPLETED
+Key Safety Features:
+
+Never Loses Data: Even with missing info, system captures what it can
+Fraud Detection: Missing meter readings trigger HIGH priority alerts
+Flexible Recovery: Can process reconciliation later when data arrives
+Audit Trail: Every attempt logged in stock_valuation_audit
+Business Continuity: Station operations continue despite data gaps
+
+This design acknowledges real African conditions - power outages, equipment failures, manual processes - while maintaining financial integrity and fraud prevention.

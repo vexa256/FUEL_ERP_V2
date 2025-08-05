@@ -1,0 +1,257 @@
+# FUEL ERP V2 - Price Changes & FIFO Layer Impact Analysis
+
+## Overview
+
+The FUEL_ERP_V2 system maintains a **dual-price architecture** that separates selling prices from inventory costs. This design ensures that daily price changes don't corrupt historical cost data while enabling sophisticated inventory valuation adjustments when needed.
+
+## 1. Price Architecture
+
+### 1.1 Two Distinct Price Types
+
+1. **Selling Prices** (`selling_prices` table)
+   - Customer-facing prices
+   - Change frequently (daily/hourly)
+   - Used for revenue calculation
+   - Do NOT directly affect FIFO layer costs
+
+2. **FIFO Layer Costs** (`fifo_layers.cost_per_liter_ugx`)
+   - Historical purchase costs
+   - Fixed at delivery time
+   - Used for COGS calculation
+   - Protected from selling price changes
+
+### 1.2 Market Prices (Third Type)
+```sql
+market_prices table:
+- market_price_per_liter_ugx
+- price_source (API_FEED, MANUAL, CALCULATED, ESTIMATED)
+- price_quality (REAL_TIME, RECENT, STALE, SUSPECT)
+- Used for inventory valuation adjustments
+```
+
+## 2. How Price Changes Work
+
+### 2.1 Selling Price Changes
+
+When a new selling price is set:
+
+```sql
+-- Trigger: tr_price_change_impact_tracking
+1. Calculates current stock for fuel type
+2. Estimates margin impact: (new_price - old_price) × current_stock
+3. Creates notification if impact > threshold
+4. Does NOT modify FIFO layers
+```
+
+**Key Point**: Selling price changes affect future revenue but NOT existing inventory costs.
+
+### 2.2 FIFO Layer Creation
+
+FIFO layers are created ONLY at delivery time:
+
+```sql
+-- Trigger: tr_enhanced_delivery_fifo_layers
+INSERT INTO fifo_layers (
+    cost_per_liter_ugx,  -- From delivery cost
+    original_volume_liters,
+    delivery_date
+)
+```
+
+The `cost_per_liter_ugx` is immutable under normal operations.
+
+## 3. Inventory Valuation Adjustments
+
+While FIFO costs are generally fixed, the system provides three mechanisms for adjustments:
+
+### 3.1 Lower of Cost or Market (LCM) Write-downs
+
+When market prices fall significantly below inventory cost:
+
+```sql
+PROCEDURE sp_calculate_lcm_adjustment:
+- Compares FIFO cost vs current market price
+- If market < cost by >5% (configurable), flags write-down
+- Requires manual approval to apply
+
+PROCEDURE sp_apply_lcm_writedown:
+- Updates affected FIFO layers
+- Sets cost_per_liter_ugx = market_price
+- Creates financial_ledger entry for loss
+- Maintains audit trail
+```
+
+**Example Scenario**:
+- FIFO Layer: 10,000L @ 5,500 UGX/L = 55,000,000 UGX
+- Market Price Falls to: 5,000 UGX/L
+- LCM Adjustment: -5,000,000 UGX (written down)
+- New Layer Cost: 5,000 UGX/L
+
+### 3.2 Weighted Average Cost Recalculation
+
+For significant cost structure changes:
+
+```sql
+PROCEDURE sp_calculate_weighted_average_cost:
+- Calculates new weighted average across all active layers
+- Compares to current costs
+- Flags if variance > threshold
+
+PROCEDURE sp_apply_weighted_average_cost:
+- Updates ALL active FIFO layers to new weighted average
+- Maintains total inventory value
+- Requires approval for large adjustments
+```
+
+**Example Scenario**:
+- Layer 1: 5,000L @ 5,200 UGX/L
+- Layer 2: 8,000L @ 5,500 UGX/L
+- Layer 3: 3,000L @ 5,800 UGX/L
+- Weighted Average: 5,456.25 UGX/L
+- All layers updated to this cost
+
+### 3.3 Market Value Override
+
+For exceptional circumstances:
+
+```sql
+-- Updates market_value_per_liter_ugx field
+-- Used in parallel with cost for reporting
+-- Doesn't change actual FIFO cost
+-- Provides "mark-to-market" view
+```
+
+## 4. Daily Operations Impact
+
+### 4.1 Normal Daily Price Changes
+
+**What Happens**:
+1. Selling price updated in `selling_prices`
+2. Future sales use new price
+3. FIFO layers remain unchanged
+4. COGS based on historical costs
+5. Margin naturally fluctuates
+
+**What Does NOT Happen**:
+- No FIFO layer updates
+- No inventory revaluation
+- No financial adjustments
+
+### 4.2 Reconciliation Process
+
+During daily reconciliation:
+```sql
+-- From tr_enhanced_evening_dip_reconciliation
+1. Sales Value = Dispensed × Current Selling Price
+2. COGS = Sum of FIFO consumption at historical costs
+3. Gross Profit = Sales - COGS
+4. Margin reflects price vs cost relationship
+```
+
+### 4.3 Automated Monitoring
+
+The system includes automated checks:
+
+```sql
+-- Trigger: tr_auto_lcm_check_on_reconciliation
+IF closing_stock_value > 0 AND days_since_last_check >= frequency THEN
+    CALL sp_calculate_lcm_adjustment()
+    IF writedown_required THEN
+        CREATE notification for manual review
+    END IF
+END IF
+```
+
+## 5. Multi-Layer Impact Scenarios
+
+### Scenario 1: Price Increase (No FIFO Impact)
+```
+Day 1: Selling Price 5,000 → 5,500 UGX/L
+- Layer A (10,000L @ 4,800): No change
+- Layer B (5,000L @ 4,900): No change
+- Revenue increases, margins improve
+- COGS remains based on 4,800-4,900
+```
+
+### Scenario 2: Market Crash (LCM Write-down)
+```
+Market Price drops to 4,000 UGX/L
+- Layer A (10,000L @ 4,800): Write down to 4,000
+- Layer B (5,000L @ 4,900): Write down to 4,000
+- Financial impact: -8,500,000 UGX
+- Requires CFO/CEO approval
+```
+
+### Scenario 3: Revaluation Event
+```
+Major supplier cost change, weighted average recalc:
+- All active layers: Updated to 5,200 UGX/L
+- Total inventory value preserved
+- Individual layer costs normalized
+- Historical audit trail maintained
+```
+
+## 6. Controls & Safeguards
+
+### 6.1 Authorization Requirements
+
+1. **Automatic**: No manual cost changes allowed
+2. **LCM Write-downs**: CFO approval for >5%
+3. **Weighted Average**: CEO approval for major adjustments
+4. **Audit Trail**: Every change logged in `stock_valuation_audit`
+
+### 6.2 Data Integrity
+
+```sql
+-- FIFO layers protected by:
+1. No direct UPDATE permissions on cost fields
+2. Triggers validate all modifications
+3. Hash chains on critical tables
+4. Comprehensive audit logging
+```
+
+### 6.3 Reconciliation Queue
+
+Failed valuations are queued:
+```sql
+reconciliation_queue:
+- Captures valuation errors
+- Allows manual intervention
+- Preserves data for reprocessing
+- Escalates to appropriate level
+```
+
+## 7. Best Practices
+
+### For Daily Operations:
+1. **Update selling prices** as needed - no impact on FIFO
+2. **Monitor notifications** for LCM warnings
+3. **Review margin reports** to understand price/cost dynamics
+4. **Don't manually adjust** FIFO costs
+
+### For Month-End:
+1. **Run LCM analysis** on all tanks
+2. **Review write-down recommendations**
+3. **Process approved adjustments** before closing
+4. **Validate inventory valuation reports**
+
+### For System Administrators:
+1. **Configure thresholds** appropriately:
+   - `LCM_WRITEDOWN_THRESHOLD_PCT`: Default 5%
+   - `WEIGHTED_AVERAGE_RECALC_THRESHOLD`: Default 10%
+2. **Monitor** `system_health_monitoring` for valuation errors
+3. **Ensure** market price feeds are current
+4. **Backup** before major revaluations
+
+## Key Takeaways
+
+1. **Selling prices and FIFO costs are independent** - daily price changes don't affect inventory valuation
+2. **FIFO costs are immutable** except through controlled adjustment procedures
+3. **Three adjustment methods** available for exceptional circumstances:
+   - LCM write-downs (market < cost)
+   - Weighted average recalculation
+   - Market value tracking (parallel reporting)
+4. **All adjustments require approval** and create comprehensive audit trails
+5. **System automatically monitors** for valuation issues but requires human decision for adjustments
+
+This architecture ensures accurate COGS reporting based on actual purchase costs while providing flexibility for necessary valuation adjustments in response to significant market changes.
