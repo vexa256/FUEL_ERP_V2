@@ -248,10 +248,10 @@
                         <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
                         <span>Manage Tanks</span>
                     </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-tachometer-alt w-3 h-3 mr-2 opacity-60"></i>
                         <span>Add Meter</span>
-                    </a>
+                    </a> --}}
                     <a href="{{ route('meters.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-tools w-3 h-3 mr-2 opacity-60"></i>
                         <span>Manage Meters</span>
@@ -346,12 +346,12 @@
                 <div class="menu-dropdown bg-accent/10 rounded-lg" id="daily-readings-dropdown">
                     <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-sun w-3 h-3 mr-2 opacity-60 text-emerald-600"></i>
-                        <span>Morning Dip Readings</span>
+                        <span>Daily Dip Readings</span>
                     </a>
-                    <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    {{-- <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-moon w-3 h-3 mr-2 opacity-60"></i>
                         <span>Evening Dip Readings</span>
-                    </a>
+                    </a> --}}
                     {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-thermometer-half w-3 h-3 mr-2 opacity-60"></i>
                         <span>Temperature & Water</span>
@@ -377,10 +377,10 @@
                     </div>
                 </div>
                 <div class="menu-dropdown bg-accent/10 rounded-lg" id="meter-readings-dropdown">
-                    <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    {{-- <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-cyan-600"></i>
-                        <span>Record Meter Reading</span>
-                    </a>
+                        <span> Meter Reading</span>
+                    </a> --}}
                     <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
                         <span>Daily Meter Readings</span>
