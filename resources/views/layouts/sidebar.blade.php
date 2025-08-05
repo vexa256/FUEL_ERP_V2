@@ -450,10 +450,10 @@
                     <div class="flex items-center space-x-2">
                         <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
                         <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="variance-dropdown-arrow"></i>
+                            id="variance-dropdown2-arrow"></i>
                     </div>
                 </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown">
+                <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown2">
                     <a href="{{ route('variance.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
                         <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
                         <span>Variance Dashboard</span>
