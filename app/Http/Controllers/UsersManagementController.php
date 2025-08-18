@@ -167,7 +167,8 @@ class UsersManagementController extends Controller
                 'admin' => 'System Administrator',
                 'manager' => 'Station Manager',
                 'supervisor' => 'Supervisor',
-                'attendant' => 'Fuel Attendant'
+                'attendant' => 'Fuel Attendant',
+                'finance' => 'Finance Officer'
             ];
 
             return view('users.create', compact('stations', 'roles'));
@@ -195,7 +196,7 @@ class UsersManagementController extends Controller
                 'last_name' => 'required|string|max:100',
                 'email' => 'required|email|max:255|unique:users,email',
                 'phone' => 'nullable|string|max:20',
-                'role' => 'required|in:admin,manager,attendant,supervisor',
+                'role' => 'required|in:admin,manager,attendant,supervisor,finance',
                 'password' => 'required|string|min:8|confirmed',
                 'is_active' => 'boolean'
             ]);

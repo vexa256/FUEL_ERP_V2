@@ -20,7 +20,7 @@
         </button>
     </div>
 
-    <!-- Navigation - Scrollable Content -->
+    <!-- Navigation - Scrollable Content -->`
     <div class="sidebar-content flex-1 p-3">
         <nav class="space-y-2">
             <!-- 1. OVERVIEW - All Users -->
@@ -45,45 +45,54 @@
 
 
               <div class="menu-section">
-                <div class="mb-3 px-2">
-                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
-                        <span class="phase-badge mr-2 bg-gradient-to-r from-red-500 to-red-600">Alert</span>
-                        Monitoring & Alerts
-                    </span>
-                </div>
+@auth
+    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'finance')
+        <div class="mb-3 px-2">
+            <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
+                <span class="phase-badge mr-2 bg-gradient-to-r from-red-500 to-red-600">Alert</span>
+                Monitoring & Alerts
+            </span>
+        </div>
 
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('variance-dropdown2')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-red-50 rounded-lg p-1.5">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <span class="font-medium">Variance Management</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="variance-dropdown2-arrow"></i>
-                    </div>
+        <div class="menu-section-header hover:bg-accent/50 transition-all"
+             onclick="toggleInnovativeDropdown('variance-dropdown2')">
+            <div class="flex items-center space-x-3">
+                <div class="menu-icon bg-red-50 rounded-lg p-1.5">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
                 </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown2">
-                    <a href="{{ route('variance.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
-                        <span>Variance Dashboard</span>
-                    </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Variance Trends</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Approve Variances</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-search w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Investigation Log</span>
-                    </a> --}}
-                </div>
+                <span class="font-medium">Variance Management</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
+                <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                   id="variance-dropdown2-arrow"></i>
+            </div>
+        </div>
+
+        <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown2">
+            <a href="{{ route('variance.index') }}"
+               class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
+                <span>Variance Dashboard</span>
+            </a>
+            {{-- Uncomment if needed later
+            <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
+                <span>Variance Trends</span>
+            </a>
+            <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
+                <span>Approve Variances</span>
+            </a>
+            <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-search w-3 h-3 mr-2 opacity-60"></i>
+                <span>Investigation Log</span>
+            </a>
+            --}}
+        </div>
+    @endif
+@endauth
+
 
                 {{-- <div class="menu-section-header hover:bg-accent/50 transition-all"
                     onclick="toggleInnovativeDropdown('notifications-dropdown')">
@@ -153,49 +162,51 @@
             </div>
 
               <div class="menu-section">
-                <div class="mb-3 px-2">
-                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
-                        <span class="phase-badge mr-2 bg-gradient-to-r from-red-500 to-red-600">Accounting</span>
-                       Financials
-                    </span>
+                @auth
+    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'finance')
+        <div class="mb-3 px-2">
+            <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
+                <span class="phase-badge mr-2 bg-gradient-to-r from-red-500 to-red-600">Accounting</span>
+               Financials
+            </span>
+        </div>
+
+        <div class="menu-section-header hover:bg-accent/50 transition-all"
+            onclick="toggleInnovativeDropdown('variance-dropdown')">
+            <div class="flex items-center space-x-3">
+                <div class="menu-icon bg-red-50 rounded-lg p-1.5">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
                 </div>
+                <span class="font-medium">Accounting Module</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
+                <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                    id="variance-dropdown-arrow"></i>
+            </div>
+        </div>
+        <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown">
+            <a href="{{ route('reports.daily-profit-loss') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
+                <span> Profit & Loss Statement</span>
+            </a>
+            <a href="{{ route('reconciliation.analytics') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
+                <span>Reconciliation Dashboard</span>
+            </a>
+            <a href="{{ route('cogs.dashboard') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
+                <span>Cost of Goods (COGS)</span>
+            </a>
 
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('variance-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-red-50 rounded-lg p-1.5">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <span class="font-medium">Accounting Module</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-count bg-red-100 text-red-700 border border-red-200">3</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="variance-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="variance-dropdown">
-                    <a href="{{ route('reports.daily-profit-loss') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-bell w-3 h-3 mr-2 opacity-60 text-red-600"></i>
-                        <span> Profit & Loss Statement</span>
-                    </a>
-                    <a href="{{ route('reconciliation.analytics') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-chart-line w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Reconciliation Dashboard</span>
-                    </a>
-                    <a href="{{ route('cogs.dashboard') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Cost of Goods (COGS)</span>
-                    </a>
+             <a href="{{ route('reports.inventory-analysis') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
+                <span>Inventory Analysis</span>
+            </a>
+        </div>
+    @endif
+@endauth
 
-                     <a href="{{ route('reports.inventory-analysis') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Inventory Analysis</span>
-                    </a>
-
-
-
-                </div>
 
                 {{-- <div class="menu-section-header hover:bg-accent/50 transition-all"
                     onclick="toggleInnovativeDropdown('notifications-dropdown')">
@@ -264,280 +275,254 @@
                 </div> --}}
             </div>
             <!-- PHASE 1: Foundation Data Setup -->
-            <div class="menu-section">
-                <div class="mb-3 px-2">
-                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
-                        <span class="phase-badge mr-2 bg-gradient-to-r from-blue-500 to-blue-600">Setup</span>
-                        Foundation Setup
-                    </span>
-                </div>
+        @auth
+    @if(auth()->user()->role === 'admin')
+        <div class="menu-section">
+            <div class="mb-3 px-2">
+                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
+                    <span class="phase-badge mr-2 bg-gradient-to-r from-blue-500 to-blue-600">Setup</span>
+                    Foundation Setup
+                </span>
+            </div>
 
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('stations-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-blue-50 rounded-lg p-1.5">
-                            <i class="fas fa-building text-blue-600"></i>
-                        </div>
-                        <span class="font-medium">Stations</span>
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('stations-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-blue-50 rounded-lg p-1.5">
+                        <i class="fas fa-building text-blue-600"></i>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-status bg-blue-100 text-blue-700 border border-blue-200">Core</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="stations-dropdown-arrow"></i>
-                    </div>
+                    <span class="font-medium">Stations</span>
                 </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="stations-dropdown">
-                    <a href="{{ route('stations.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-blue-600"></i>
-                        <span>Add Station</span>
-                    </a>
-                    <a href="{{ route('stations.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Manage Stations</span>
-                    </a>
-                    <a href="{{ route('stations.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-cog w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Station Settings</span>
-                    </a>
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('users-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-purple-50 rounded-lg p-1.5">
-                            <i class="fas fa-users text-purple-600"></i>
-                        </div>
-                        <span class="font-medium">Users & Employees</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-status bg-purple-100 text-purple-700 border border-purple-200">Core</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="users-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="users-dropdown">
-                    <a href="{{ route('users.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-user-plus w-3 h-3 mr-2 opacity-60 text-purple-600"></i>
-                        <span>Add Employee</span>
-                    </a>
-                    <a href="{{ route('users.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-users-cog w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Manage Employees</span>
-                    </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-shield-alt w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Role Management</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-key w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Access Control</span>
-                    </a> --}}
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('infrastructure-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-indigo-50 rounded-lg p-1.5">
-                            <i class="fas fa-oil-well text-indigo-600"></i>
-                        </div>
-                        <span class="font-medium">Infrastructure</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-status bg-indigo-100 text-indigo-700 border border-indigo-200">Core</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="infrastructure-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="infrastructure-dropdown">
-                    <a href="{{ route('tanks.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-indigo-600"></i>
-                        <span>Add Tank</span>
-                    </a>
-                    <a href="{{ route('tanks.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Manage Tanks</span>
-                    </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-tachometer-alt w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Add Meter</span>
-                    </a> --}}
-                    <a href="{{ route('meters.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-tools w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Manage Meters</span>
-                    </a>
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('pricing-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-green-50 rounded-lg p-1.5">
-                            <i class="fas fa-tags text-green-600"></i>
-                        </div>
-                        <span class="font-medium">Pricing Management</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-status bg-green-100 text-green-700 border border-green-200">Core</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="pricing-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="pricing-dropdown">
-                    <a href="{{ route('pricing.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-dollar-sign w-3 h-3 mr-2 opacity-60 text-green-600"></i>
-                        <span> Selling Prices</span>
-                    </a>
-                    <a href="{{ route('price-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-history w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Price Analytics</span>
-                    </a>
-
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-blue-100 text-blue-700 border border-blue-200">Core</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="stations-dropdown-arrow"></i>
                 </div>
             </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="stations-dropdown">
+                <a href="{{ route('stations.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-blue-600"></i>
+                    <span>Add Station</span>
+                </a>
+                <a href="{{ route('stations.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Manage Stations</span>
+                </a>
+                <a href="{{ route('stations.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-cog w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Station Settings</span>
+                </a>
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('users-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-purple-50 rounded-lg p-1.5">
+                        <i class="fas fa-users text-purple-600"></i>
+                    </div>
+                    <span class="font-medium">Users & Employees</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-purple-100 text-purple-700 border border-purple-200">Core</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="users-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="users-dropdown">
+                <a href="{{ route('users.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-user-plus w-3 h-3 mr-2 opacity-60 text-purple-600"></i>
+                    <span>Add Employee</span>
+                </a>
+                <a href="{{ route('users.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-users-cog w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Manage Employees</span>
+                </a>
+                {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-shield-alt w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Role Management</span>
+                </a>
+                <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-key w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Access Control</span>
+                </a> --}}
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('infrastructure-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-indigo-50 rounded-lg p-1.5">
+                        <i class="fas fa-oil-well text-indigo-600"></i>
+                    </div>
+                    <span class="font-medium">Infrastructure</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-indigo-100 text-indigo-700 border border-indigo-200">Core</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="infrastructure-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="infrastructure-dropdown">
+                <a href="{{ route('tanks.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-indigo-600"></i>
+                    <span>Add Tank</span>
+                </a>
+                <a href="{{ route('tanks.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Manage Tanks</span>
+                </a>
+                {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-tachometer-alt w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Add Meter</span>
+                </a> --}}
+                <a href="{{ route('meters.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-tools w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Manage Meters</span>
+                </a>
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('pricing-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-green-50 rounded-lg p-1.5">
+                        <i class="fas fa-tags text-green-600"></i>
+                    </div>
+                    <span class="font-medium">Pricing Management</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-green-100 text-green-700 border border-green-200">Core</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="pricing-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="pricing-dropdown">
+                <a href="{{ route('pricing.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-dollar-sign w-3 h-3 mr-2 opacity-60 text-green-600"></i>
+                    <span> Selling Prices</span>
+                </a>
+                <a href="{{ route('price-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-history w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Price Analytics</span>
+                </a>
+            </div>
+        </div>
+    @endif
+@endauth
+
 
             <!-- PHASE 2: Core Operations -->
-            <div class="menu-section">
-                <div class="mb-3 px-2">
-                    <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
-                        <span class="phase-badge mr-2 bg-gradient-to-r from-emerald-500 to-emerald-600">Ops</span>
-                        Daily Operations
-                    </span>
-                </div>
+       @auth
+    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'manager'|| auth()->user()->role === 'supervisor')
+        <div class="menu-section">
+            <div class="mb-3 px-2">
+                <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">
+                    <span class="phase-badge mr-2 bg-gradient-to-r from-emerald-500 to-emerald-600">Ops</span>
+                    Daily Operations
+                </span>
+            </div>
 
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('deliveries-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-orange-50 rounded-lg p-1.5">
-                            <i class="fas fa-truck text-orange-600"></i>
-                        </div>
-                        <span class="font-medium">Deliveries</span>
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('deliveries-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-orange-50 rounded-lg p-1.5">
+                        <i class="fas fa-truck text-orange-600"></i>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span
-                            class="badge-status bg-orange-100 text-orange-700 border border-orange-200">Auto-FIFO</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="deliveries-dropdown-arrow"></i>
-                    </div>
+                    <span class="font-medium">Deliveries</span>
                 </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="deliveries-dropdown">
-                    <a href="{{ route('deliveries.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-orange-600"></i>
-                        <span> Deliveries</span>
-                    </a>
-                    <a href="{{ route('deliveries.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Create Delivery</span>
-                    </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-check-circle w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Pending Approvals</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-layer-group w-3 h-3 mr-2 opacity-60"></i>
-                        <span>View FIFO Layers</span>
-                    </a> --}}
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('daily-readings-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-emerald-50 rounded-lg p-1.5">
-                            <i class="fas fa-calendar-day text-emerald-600"></i>
-                        </div>
-                        <span class="font-medium">Daily Readings</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span
-                            class="badge-status bg-emerald-100 text-emerald-700 border border-emerald-200">Auto-Reconcile</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="daily-readings-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="daily-readings-dropdown">
-                    <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-sun w-3 h-3 mr-2 opacity-60 text-emerald-600"></i>
-                        <span>Daily Dip Readings</span>
-                    </a>
-                    {{-- <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-moon w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Evening Dip Readings</span>
-                    </a> --}}
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-thermometer-half w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Temperature & Water</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-history w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Reading History</span>
-                    </a> --}}
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('meter-readings-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-cyan-50 rounded-lg p-1.5">
-                            <i class="fas fa-tachometer-alt text-cyan-600"></i>
-                        </div>
-                        <span class="font-medium">Meter Readings</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="badge-status bg-cyan-100 text-cyan-700 border border-cyan-200">Auto-Sales</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="meter-readings-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="meter-readings-dropdown">
-                    {{-- <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-cyan-600"></i>
-                        <span> Meter Reading</span>
-                    </a> --}}
-                    <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Daily Meter Readings</span>
-                    </a>
-                    {{-- <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-exclamation-triangle w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Meter Reset Detection</span>
-                    </a>
-                    <a href="#" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-chart-bar w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Sales Analytics</span>
-                    </a> --}}
-                </div>
-
-                <div class="menu-section-header hover:bg-accent/50 transition-all"
-                    onclick="toggleInnovativeDropdown('reconciliation-dropdown')">
-                    <div class="flex items-center space-x-3">
-                        <div class="menu-icon bg-amber-50 rounded-lg p-1.5">
-                            <i class="fas fa-balance-scale text-amber-600"></i>
-                        </div>
-                        <span class="font-medium">Reconciliation</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span
-                            class="badge-status bg-amber-100 text-amber-700 border border-amber-200">Auto-Generated</span>
-                        <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
-                            id="reconciliation-dropdown-arrow"></i>
-                    </div>
-                </div>
-                <div class="menu-dropdown bg-accent/10 rounded-lg" id="reconciliation-dropdown">
-                    <a href="{{ route('reports.daily-reconciliation') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-eye w-3 h-3 mr-2 opacity-60 text-amber-600"></i>
-                        <span>View Daily Reconciliation</span>
-                    </a>
-                    <a href="{{ route('reports.weekly-summary') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-calendar-week w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Weekly Summary</span>
-                    </a>
-                    <a href="{{ route('reports.monthly-summary') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-calendar-alt w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Monthly Summary</span>
-                    </a>
-                    <a href="{{ route('reconciliation-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
-                        <i class="fas fa-calculator w-3 h-3 mr-2 opacity-60"></i>
-                        <span>Reconcliation Analysis</span>
-                    </a>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-orange-100 text-orange-700 border border-orange-200">Auto-FIFO</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="deliveries-dropdown-arrow"></i>
                 </div>
             </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="deliveries-dropdown">
+                <a href="{{ route('deliveries.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-plus w-3 h-3 mr-2 opacity-60 text-orange-600"></i>
+                    <span> Deliveries</span>
+                </a>
+                <a href="{{ route('deliveries.create') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Create Delivery</span>
+                </a>
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('daily-readings-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-emerald-50 rounded-lg p-1.5">
+                        <i class="fas fa-calendar-day text-emerald-600"></i>
+                    </div>
+                    <span class="font-medium">Daily Readings</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-emerald-100 text-emerald-700 border border-emerald-200">Auto-Reconcile</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="daily-readings-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="daily-readings-dropdown">
+                <a href="{{ route('dip-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-sun w-3 h-3 mr-2 opacity-60 text-emerald-600"></i>
+                    <span>Daily Dip Readings</span>
+                </a>
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('meter-readings-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-cyan-50 rounded-lg p-1.5">
+                        <i class="fas fa-tachometer-alt text-cyan-600"></i>
+                    </div>
+                    <span class="font-medium">Meter Readings</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-cyan-100 text-cyan-700 border border-cyan-200">Auto-Sales</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="meter-readings-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="meter-readings-dropdown">
+                <a href="{{ route('meter-readings.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Daily Meter Readings</span>
+                </a>
+            </div>
+
+            <div class="menu-section-header hover:bg-accent/50 transition-all"
+                onclick="toggleInnovativeDropdown('reconciliation-dropdown')">
+                <div class="flex items-center space-x-3">
+                    <div class="menu-icon bg-amber-50 rounded-lg p-1.5">
+                        <i class="fas fa-balance-scale text-amber-600"></i>
+                    </div>
+                    <span class="font-medium">Reconciliation</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="badge-status bg-amber-100 text-amber-700 border border-amber-200">Auto-Generated</span>
+                    <i class="fas fa-chevron-right menu-arrow transition-transform duration-200"
+                        id="reconciliation-dropdown-arrow"></i>
+                </div>
+            </div>
+            <div class="menu-dropdown bg-accent/10 rounded-lg" id="reconciliation-dropdown">
+                <a href="{{ route('reports.daily-reconciliation') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-eye w-3 h-3 mr-2 opacity-60 text-amber-600"></i>
+                    <span>View Daily Reconciliation</span>
+                </a>
+                <a href="{{ route('reports.weekly-summary') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-calendar-week w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Weekly Summary</span>
+                </a>
+                <a href="{{ route('reports.monthly-summary') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-calendar-alt w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Monthly Summary</span>
+                </a>
+                <a href="{{ route('reconciliation-analysis.index') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-calculator w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Reconcliation Analysis</span>
+                </a>
+            </div>
+        </div>
+    @endif
+@endauth
+
 
             <!-- PHASE 3: Monitoring & Alerts -->
 
