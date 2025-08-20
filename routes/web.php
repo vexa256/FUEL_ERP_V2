@@ -120,13 +120,30 @@ Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function
 //     Route::get('daily-dip-readings/pending', [App\Http\Controllers\MorningDipReadingsController::class, 'getSummary'])
 //         ->name('daily-dip-readings.pending');
 // });
-// Deliveries Routes
+// // Deliveries Routes
+// use App\Http\Controllers\DeliveriesController;
+
 Route::middleware(['auth'])->group(function () {
+    // ✅ Your original routes (unchanged)
     Route::get('/deliveries', [DeliveriesController::class, 'index'])->name('deliveries.index');
     Route::get('/deliveries/create', [DeliveriesController::class, 'create'])->name('deliveries.create');
     Route::post('/deliveries', [DeliveriesController::class, 'store'])->name('deliveries.store');
     Route::get('/deliveries/{delivery}', [DeliveriesController::class, 'show'])->name('deliveries.show');
     Route::get('/api/tanks/{tank}/capacity', [DeliveriesController::class, 'getTankCapacity'])->name('api.tanks.capacity');
+
+    // 🆕 NEW: Missing CRUD routes for deliveries
+    Route::get('/deliveries/{delivery}/edit', [DeliveriesController::class, 'edit'])->name('deliveries.edit');
+    Route::put('/deliveries/{delivery}', [DeliveriesController::class, 'update'])->name('deliveries.update');
+    Route::delete('/deliveries/{delivery}', [DeliveriesController::class, 'destroy'])->name('deliveries.destroy');
+
+    // 🆕 NEW: Overflow management routes
+    Route::get('/deliveries/overflow/dashboard', [DeliveriesController::class, 'overflowDashboard'])->name('deliveries.overflow.dashboard');
+    Route::post('/deliveries/overflow/return-to-tank', [DeliveriesController::class, 'returnToTank'])->name('deliveries.overflow.rtt');
+
+    // 🆕 NEW: Pre-validation and API routes
+    Route::post('/api/deliveries/pre-validate', [DeliveriesController::class, 'preValidateDelivery'])->name('api.deliveries.prevalidate');
+    Route::get('/api/fuel-types', [DeliveriesController::class, 'getSupportedFuelTypes'])->name('api.fuel.types');
+    Route::get('/api/stations/{station}/tanks', [DeliveriesController::class, 'getTanksByStation'])->name('api.stations.tanks');
 });
 
 Route::middleware(['auth'])->prefix('pricing')->name('pricing.')->group(function () {
