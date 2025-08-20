@@ -443,6 +443,11 @@
                     <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
                     <span>Create Delivery</span>
                 </a>
+
+                 <a href="{{ route('rtt.analytics') }}" class="menu-dropdown-item hover:bg-accent/30 transition-colors">
+                    <i class="fas fa-list w-3 h-3 mr-2 opacity-60"></i>
+                    <span>Overflow Dashboard </span>
+                </a>
             </div>
 
             <div class="menu-section-header hover:bg-accent/50 transition-all"

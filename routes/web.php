@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportsController;
 // use App\Http\Controllers\;
 use App\Http\Controllers\VarianceController;
 use App\Http\Controllers\DeliveriesController;
+use App\Http\Controllers\RTTAnalyticsController;
 use App\Http\Controllers\MeterReadingsController;
 use App\Http\Controllers\PriceAnalysisController;
 use App\Http\Controllers\TankManagementController;
@@ -124,6 +125,8 @@ Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function
 // use App\Http\Controllers\DeliveriesController;
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/rtt/analytics', [RTTAnalyticsController::class, 'index'])->name('rtt.analytics');
     // ✅ Your original routes (unchanged)
     Route::get('/deliveries', [DeliveriesController::class, 'index'])->name('deliveries.index');
     Route::get('/deliveries/create', [DeliveriesController::class, 'create'])->name('deliveries.create');

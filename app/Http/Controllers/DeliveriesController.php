@@ -430,7 +430,7 @@ class DeliveriesController extends Controller
 
             $overflow_records = DB::table('delivery_overflow_storage')
                 ->select([
-                    'id', 'overflow_volume_liters', 'remaining_volume_liters', 'cost_per_liter_ugx',
+                    'id', 'overflow_volume_liters','delivery_reference', 'remaining_volume_liters', 'cost_per_liter_ugx',
                     'total_overflow_value_ugx', 'remaining_value_ugx', 'storage_reason', 'priority_level',
                     'manual_hold', 'quality_approved', 'overflow_date', 'overflow_time', 'is_exhausted'
                 ])
